@@ -2,6 +2,16 @@
 
 A modern web-based admin panel for managing cargo and delivery operations. Built with React, TypeScript, and Material-UI.
 
+## Features
+
+- 🔐 Secure authentication system
+- 📊 Dashboard with cargo statistics
+- 📦 Cargo management system
+- 👥 Driver management
+- 💰 Payment tracking
+- 📅 Date-based cargo scheduling
+- 📱 Responsive design
+
 ## Version History
 
 ### v1.1
@@ -13,13 +23,7 @@ A modern web-based admin panel for managing cargo and delivery operations. Built
   - Active cargo delivery status integration
 
 ### v1.0
-- 🔐 Secure authentication system
-- 📊 Dashboard with cargo statistics
-- 📦 Cargo management system
-- 👥 Driver management
-- 💰 Payment tracking
-- 📅 Date-based cargo scheduling
-- 📱 Responsive design
+- Initial release with core functionality
 
 ## Tech Stack
 
