@@ -2,19 +2,19 @@ import React, { useState, useEffect } from 'react';
 import {
   Container,
   Paper,
+  Typography,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
-  MenuItem,
   Box,
-  Typography,
-  Select,
   FormControl,
-  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  CircularProgress,
 } from '@mui/material';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
@@ -28,6 +28,7 @@ const Dashboard: React.FC = () => {
   const [filteredCargo, setFilteredCargo] = useState<Cargo[]>([]);
   const [driverFilter, setDriverFilter] = useState('');
   const [monthFilter, setMonthFilter] = useState<Date | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCargo = async () => {
@@ -36,7 +37,9 @@ const Dashboard: React.FC = () => {
         setCargoList(cargo);
         setFilteredCargo(cargo);
       } catch (error) {
-        console.error('Failed to fetch cargo:', error);
+        console.error('Error fetching cargo:', error);
+      } finally {
+        setLoading(false);
       }
     };
     fetchCargo();
@@ -53,7 +56,7 @@ const Dashboard: React.FC = () => {
 
     if (monthFilter) {
       filtered = filtered.filter(cargo => {
-        const cargoDate = cargo.pickupDate instanceof Date ? cargo.pickupDate : new Date(cargo.pickupDate);
+        const cargoDate = new Date(cargo.pickupDate);
         return cargoDate.getMonth() === monthFilter.getMonth() &&
                cargoDate.getFullYear() === monthFilter.getFullYear();
       });
@@ -67,11 +70,11 @@ const Dashboard: React.FC = () => {
       await updateCargoStatus(cargoId, newStatus);
       setCargoList(prevList =>
         prevList.map(cargo =>
-          cargo.id === cargoId ? { ...cargo, loadStatus: newStatus } : cargo
+          cargo.id === cargoId ? { ...cargo, status: newStatus } : cargo
         )
       );
     } catch (error) {
-      console.error('Failed to update cargo status:', error);
+      console.error('Error updating cargo status:', error);
     }
   };
 
@@ -84,13 +87,21 @@ const Dashboard: React.FC = () => {
         )
       );
     } catch (error) {
-      console.error('Failed to update payment status:', error);
+      console.error('Error updating payment status:', error);
     }
   };
 
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   return (
-    <>
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <Paper sx={{ p: 2 }}>
         <Typography variant="h4" gutterBottom>
           Cargo Dashboard
         </Typography>
@@ -117,12 +128,12 @@ const Dashboard: React.FC = () => {
           </LocalizationProvider>
         </Box>
 
-        <TableContainer component={Paper}>
+        <TableContainer>
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>From</TableCell>
-                <TableCell>To</TableCell>
+                <TableCell>Pickup Location</TableCell>
+                <TableCell>Delivery Location</TableCell>
                 <TableCell>Pickup Date</TableCell>
                 <TableCell>Driver</TableCell>
                 <TableCell>Rate</TableCell>
@@ -134,10 +145,10 @@ const Dashboard: React.FC = () => {
             <TableBody>
               {filteredCargo.map((cargo) => (
                 <TableRow key={cargo.id}>
-                  <TableCell>{cargo.from}</TableCell>
-                  <TableCell>{cargo.to}</TableCell>
+                  <TableCell>{cargo.pickupLocation}</TableCell>
+                  <TableCell>{cargo.deliveryLocation}</TableCell>
                   <TableCell>
-                    {format(cargo.pickupDate instanceof Date ? cargo.pickupDate : new Date(cargo.pickupDate), 'MM/dd/yyyy')}
+                    {format(new Date(cargo.pickupDate), 'MM/dd/yyyy')}
                   </TableCell>
                   <TableCell>{cargo.driverName}</TableCell>
                   <TableCell>${cargo.rate}</TableCell>
@@ -145,7 +156,7 @@ const Dashboard: React.FC = () => {
                   <TableCell>
                     <FormControl size="small">
                       <Select
-                        value={cargo.loadStatus || LoadStatus.ON_THE_WAY}
+                        value={cargo.status}
                         onChange={(e) => handleStatusChange(cargo.id, e.target.value as LoadStatus)}
                       >
                         <MenuItem value={LoadStatus.ON_THE_WAY}>On the way</MenuItem>
@@ -157,7 +168,7 @@ const Dashboard: React.FC = () => {
                   <TableCell>
                     <FormControl size="small">
                       <Select
-                        value={cargo.paymentStatus || PaymentStatus.WAITING}
+                        value={cargo.paymentStatus}
                         onChange={(e) => handlePaymentStatusChange(cargo.id, e.target.value as PaymentStatus)}
                       >
                         <MenuItem value={PaymentStatus.RECEIVED}>Received</MenuItem>
@@ -170,8 +181,8 @@ const Dashboard: React.FC = () => {
             </TableBody>
           </Table>
         </TableContainer>
-      </Container>
-    </>
+      </Paper>
+    </Container>
   );
 };
 

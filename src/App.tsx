@@ -5,6 +5,8 @@ import { auth } from './services/firebase';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import NewCargo from './pages/NewCargo';
+import History from './pages/History';
+import Drivers from './pages/Drivers';
 import Navigation from './components/Navigation';
 import { User } from './types';
 
@@ -53,6 +55,26 @@ const App: React.FC = () => {
             <>
               <Navigation />
               <NewCargo />
+            </>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } />
+        <Route path="/history" element={
+          user ? (
+            <>
+              <Navigation />
+              <History />
+            </>
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        } />
+        <Route path="/drivers" element={
+          user ? (
+            <>
+              <Navigation />
+              <Drivers />
             </>
           ) : (
             <Navigate to="/login" replace />

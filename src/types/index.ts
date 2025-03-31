@@ -22,17 +22,21 @@ export enum PaymentType {
 
 export interface Cargo {
   id: string;
-  from: string;
-  to: string;
+  pickupLocation: string;
+  deliveryLocation: string;
   pickupDate: Date;
+  deliveryDate?: Date;
   driverName: string;
+  driverId: string;
   rate: number;
   paymentType: PaymentType;
-  loadStatus?: LoadStatus;
-  paymentStatus?: PaymentStatus;
+  status: LoadStatus;
+  paymentStatus: PaymentStatus;
 }
 
 export interface Driver {
   id: string;
   name: string;
+  phoneNumber: string;
+  homeLocation: string;
 } 

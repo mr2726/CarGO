@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   Paper,
@@ -18,44 +18,74 @@ import {
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { addNewCargo } from '../services/cargo';
-import { PaymentType } from '../types';
+import { addNewCargo, getDrivers } from '../services/cargo';
+import { PaymentType, LoadStatus, PaymentStatus, Driver } from '../types';
 
-const DRIVERS = [
-  { id: '1', name: 'John Doe' },
-  { id: '2', name: 'Jane Smith' },
-  { id: '3', name: 'Mike Johnson' },
-  { id: '4', name: 'Sarah Williams' },
-];
+interface FormData {
+  pickupLocation: string;
+  deliveryLocation: string;
+  pickupDate: Date;
+  driverName: string;
+  driverId: string;
+  rate: string;
+  paymentType: PaymentType;
+  status: LoadStatus;
+  paymentStatus: PaymentStatus;
+}
 
 const NewCargo: React.FC = () => {
-  const [formData, setFormData] = useState({
-    from: '',
-    to: '',
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [formData, setFormData] = useState<FormData>({
+    pickupLocation: '',
+    deliveryLocation: '',
     pickupDate: new Date(),
     driverName: '',
+    driverId: '',
     rate: '',
     paymentType: PaymentType.COD,
+    status: LoadStatus.ON_THE_WAY,
+    paymentStatus: PaymentStatus.WAITING
   });
+
+  useEffect(() => {
+    const fetchDrivers = async () => {
+      try {
+        const driversList = await getDrivers();
+        setDrivers(driversList);
+      } catch (error) {
+        console.error('Error fetching drivers:', error);
+      }
+    };
+    fetchDrivers();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      const selectedDriver = drivers.find(d => d.name === formData.driverName);
+      if (!selectedDriver) {
+        throw new Error('Driver not found');
+      }
+
       await addNewCargo({
         ...formData,
+        driverId: selectedDriver.id,
         rate: parseFloat(formData.rate),
       });
       // Reset form
       setFormData({
-        from: '',
-        to: '',
+        pickupLocation: '',
+        deliveryLocation: '',
         pickupDate: new Date(),
         driverName: '',
+        driverId: '',
         rate: '',
         paymentType: PaymentType.COD,
+        status: LoadStatus.ON_THE_WAY,
+        paymentStatus: PaymentStatus.WAITING
       });
     } catch (error) {
-      console.error('Failed to create cargo:', error);
+      console.error('Error adding cargo:', error);
     }
   };
 
@@ -84,16 +114,16 @@ const NewCargo: React.FC = () => {
         <form onSubmit={handleSubmit}>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
-              label="From"
-              name="from"
-              value={formData.from}
+              label="Pickup Location"
+              name="pickupLocation"
+              value={formData.pickupLocation}
               onChange={handleTextFieldChange}
               required
             />
             <TextField
-              label="To"
-              name="to"
-              value={formData.to}
+              label="Delivery Location"
+              name="deliveryLocation"
+              value={formData.deliveryLocation}
               onChange={handleTextFieldChange}
               required
             />
@@ -122,7 +152,7 @@ const NewCargo: React.FC = () => {
                 onChange={handleSelectChange}
                 label="Driver"
               >
-                {DRIVERS.map((driver) => (
+                {drivers.map((driver) => (
                   <MenuItem key={driver.id} value={driver.name}>
                     {driver.name}
                   </MenuItem>

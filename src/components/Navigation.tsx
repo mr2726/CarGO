@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import { signOut } from 'firebase/auth';
 import { auth } from '../services/firebase';
+import { Link as RouterLink } from 'react-router-dom';
 
 const Navigation: React.FC = () => {
   const navigate = useNavigate();
@@ -29,11 +30,17 @@ const Navigation: React.FC = () => {
           Cargo Management System
         </Typography>
         <Box>
-          <Button color="inherit" onClick={() => navigate('/dashboard')}>
+          <Button color="inherit" component={RouterLink} to="/dashboard">
             Dashboard
           </Button>
-          <Button color="inherit" onClick={() => navigate('/new-cargo')}>
+          <Button color="inherit" component={RouterLink} to="/new-cargo">
             New Cargo
+          </Button>
+          <Button color="inherit" component={RouterLink} to="/drivers">
+            Drivers
+          </Button>
+          <Button color="inherit" component={RouterLink} to="/history">
+            History
           </Button>
           <Button color="inherit" onClick={handleLogout}>
             Logout
